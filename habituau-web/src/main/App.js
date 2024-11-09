@@ -1,12 +1,14 @@
-import logo from './logo.svg';
-import './App.css';
+
+import '../App.css';
 import 'bootswatch/dist/minty/bootstrap.css';
-import Landingpage from './views/landingpage';
+import Landingpage from '../views/landingpage';
+
+import Rotas from './routes';
 
 function App() {
   return (
     <div className="App">
-          <Landingpage></Landingpage>
+          <Rotas></Rotas>
     </div>
   );
 }
