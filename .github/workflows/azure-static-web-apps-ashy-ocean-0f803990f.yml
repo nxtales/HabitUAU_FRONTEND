@@ -25,6 +25,10 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Remove package-lock.json
+        working-directory: habituau-web # ajuste para o diretório correto
+        run: rm -f package-lock.json  # Remove package-lock.json caso exista
+
       - name: Install dependencies
         working-directory: habituau-web # ajuste para o diretório correto
         run: yarn install
@@ -34,10 +38,7 @@ jobs:
         env:
           CI: false  # Garante que CI=false durante o build
         run: |
-          # Remove dependências conflitantes de ESLint
-          yarn remove package-lock.json
-
-          # Adiciona dependências necessárias, como Babel
+          # Adiciona dependência necessária, como Babel
           yarn add -D @babel/plugin-proposal-private-property-in-object
 
           # Executa o build, ignorando warnings do ESLint
