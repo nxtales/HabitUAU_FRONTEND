@@ -29,7 +29,7 @@ jobs:
           action: "upload"
 
           ###### Configurações de Repositório/Build ######
-          app_location: "/habituau-web/src/main/App.js" # Localização do seu App React
+          app_location: "/habituau-web/src/main/" # Localização do seu App React
           api_location: "" # Campo vazio, pois as APIs estão hospedadas separadamente
           output_location: "build" # Diretório de saída do build
           ###### Fim das Configurações ######
