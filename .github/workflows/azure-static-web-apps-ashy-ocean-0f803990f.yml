@@ -26,12 +26,12 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        working-directory: habituau-web # caminho para o package.json
+        working-directory: habituau-web # Ajuste para o caminho correto do package.json
         run: yarn install
 
       - name: Build Application
-        working-directory: habituau-web # caminho para o package.json
-        run: CI=false yarn build
+        working-directory: habituau-web # Ajuste para o caminho correto do package.json
+        run: CI=false yarn build # Define CI=false para evitar falhas com warnings
 
       - name: Build And Deploy
         id: builddeploy
@@ -40,8 +40,8 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_ASHY_OCEAN_0F803990F }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/habituau-web" # Caminho para o código-fonte do app React
-          output_location: "habituau-web/build" # Diretório de saída do build gerado pelo `yarn build`
+          app_location: "/habituau-web" # Diretório da aplicação React
+          output_location: "build" # Diretório onde o build é gerado (padrão da React)
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
