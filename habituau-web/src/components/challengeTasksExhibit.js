@@ -2,14 +2,18 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const TaskListExhibit = ({ cpf }) => {
+const TaskListExhibit = () => {
     const [challenges, setChallenges] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchChallenges = async () => {
             try {
-                const response = await axios.get(`/api/challenges/${cpf}`);
+                const cpf = localStorage.getItem('cpf'); // Obtém o CPF do localStorage
+                const response = await axios.get(
+                    'https://habituau-dev-f2breaambnduhpaw.canadacentral-01.azurewebsites.net/api/challenges/getuserchallengetasks',
+                    { params: { cpf } }
+                );
                 setChallenges(response.data);
             } catch (error) {
                 console.error("Erro ao buscar desafios:", error);
@@ -17,7 +21,7 @@ const TaskListExhibit = ({ cpf }) => {
         };
 
         fetchChallenges();
-    }, [cpf]);
+    }, []);
 
     return (
         <div className="container">
@@ -31,12 +35,17 @@ const TaskListExhibit = ({ cpf }) => {
                                     <>
                                         <h4 className="card-title">{challenges[columnIndex].desafio.nome}</h4>
                                         <ul>
-                                            {challenges[columnIndex].tasks.map((task) => (
-                                                <li key={task.taskId}>
-                                                    <span>{task.taskName}</span>
-                                                    <span>{task.completed ? " ✔️" : " ❌"}</span>
-                                                </li>
-                                            ))}
+                                            {/* Exibe as tarefas se existirem */}
+                                            {challenges[columnIndex].tasks && challenges[columnIndex].tasks.length > 0 ? (
+                                                challenges[columnIndex].tasks.map((task, index) => (
+                                                    <li key={index}>
+                                                        <span>{task.taskName || "Tarefa sem nome"}</span>
+                                                        <span>{task.completed ? " ✔️" : " ❌"}</span>
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                <li>Sem tarefas para este desafio</li>
+                                            )}
                                         </ul>
                                     </>
                                 ) : (
