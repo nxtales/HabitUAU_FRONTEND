@@ -29,12 +29,11 @@ jobs:
         working-directory: habituau-web
         run: yarn install
 
-      - name: Build Application without treating warnings as errors
+      - name: Build Application with CI disabled to ignore warnings
         working-directory: habituau-web
         run: |
-          # Defina CI como false para ignorar warnings
-          export CI=false
-          yarn build || true
+          # Desativar CI para permitir que o build ignore avisos
+          CI='' yarn build
 
       - name: Deploy to Azure Static Web Apps
         id: builddeploy
