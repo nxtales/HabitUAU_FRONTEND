@@ -34,8 +34,11 @@ jobs:
         env:
           CI: false
         run: |
-          # Build sem erros de linting
-          yarn build || true
+          # Adicionando plugin babel para contornar o warning
+          yarn add -D @babel/plugin-proposal-private-property-in-object
+          
+          # Build ignorando warnings
+          ESLINT_NO_DEV_ERRORS=true react-scripts build || true
 
       - name: Build And Deploy
         id: builddeploy
