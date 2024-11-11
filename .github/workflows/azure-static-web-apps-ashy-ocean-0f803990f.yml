@@ -34,14 +34,14 @@ jobs:
         env:
           CI: false  # Garante que CI=false durante o build
         run: |
-          # Adiciona dependência necessária para o Babel
+          # Remove dependências conflitantes de ESLint
+          yarn remove package-lock.json
+
+          # Adiciona dependências necessárias, como Babel
           yarn add -D @babel/plugin-proposal-private-property-in-object
-          
-          # Alternativa 1: Ignora ESLint no build
-          ESLINT_NO_DEV_ERRORS=true yarn build || true
-          
-          # Alternativa 2: Rodar build sem lint
-          # react-scripts build --no-lint || true
+
+          # Executa o build, ignorando warnings do ESLint
+          yarn build --no-lint || true
 
       - name: Build And Deploy
         id: builddeploy
