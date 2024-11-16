@@ -19,7 +19,7 @@ class UserFriendships extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      emailToAdd: '', // Estado para armazenar o e-mail do amigo a ser adicionado
+      emailToAdd: '', // Email do amigo a ser adicionado
       friends: [], // Lista de amigos
       userEmail: null, // Email do usuário autenticado
     };
@@ -41,25 +41,50 @@ class UserFriendships extends Component {
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
       this.setState({ userEmail: userInfo.email });
     } catch (error) {
-      console.error("Erro ao buscar e-mail do usuário:", error);
-      toast.error("Erro ao obter e-mail do usuário.");
+      console.error('Erro ao buscar e-mail do usuário:', error);
+      toast.error('Erro ao obter e-mail do usuário.');
     }
   };
 
-  // Função para buscar a lista de amizades
+  // Função para buscar o email de um cliente pelo CPF usando a API `retrieve`
+  fetchEmailByCpf = async (cpf) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/cliente/retrieve/${cpf}`);
+      return response.data.email; // Retorna o email do cliente
+    } catch (error) {
+      console.error(`Erro ao buscar email para o CPF ${cpf}:`, error);
+      return undefined; // Retorna undefined em caso de erro
+    }
+  };
+
+  // Função para buscar a lista de amizades e calcular os pontos
   fetchFriends = async () => {
-    const cpf = localStorage.getItem('cpf');
-    if (!cpf) return;
+    const cpf = localStorage.getItem('cpf'); // CPF do usuário autenticado
+    if (!cpf) {
+      toast.error('CPF não encontrado. Por favor, autentique-se novamente.');
+      return;
+    }
 
     try {
       const response = await axios.get(`${API_BASE_URL}/api/amizades/cliente/${cpf}`);
       const friendsData = response.data;
 
-      // Obtém os pontos para cada amigo
-      const friendsWithPoints = await Promise.all(
+      console.log('Dados retornados da API de amigos:', friendsData);
+
+      // Verifica qual cliente é o amigo com base no CPF atual
+      const friendsWithDetails = await Promise.all(
         friendsData.map(async (friend) => {
+          const isCurrentUserCliente1 = friend.cpfCliente1 === cpf;
+
+          const amigoCpf = isCurrentUserCliente1 ? friend.cpfCliente2 : friend.cpfCliente1; // CPF do amigo
+          const amigoNome = isCurrentUserCliente1 ? friend.nomeCliente2 : friend.nomeCliente1; // Nome do amigo
+
+          // Busca o email do amigo usando o CPF
+          const amigoEmail = await this.fetchEmailByCpf(amigoCpf);
+
+          // Obtém os pontos do amigo
           const pointsResponse = await axios.get(`${API_BASE_URL}/api/challenges/getuserchallengetasks`, {
-            params: { cpf: friend.cpfAmigo },
+            params: { cpf: amigoCpf },
           });
 
           const totalPoints = pointsResponse.data.reduce((sum, task) => {
@@ -67,16 +92,17 @@ class UserFriendships extends Component {
           }, 0);
 
           return {
-            ...friend,
+            nome: amigoNome,
+            email: amigoEmail, // Agora o email é buscado corretamente
             totalPoints,
           };
         })
       );
 
-      this.setState({ friends: friendsWithPoints });
+      this.setState({ friends: friendsWithDetails });
     } catch (error) {
-      console.error("Erro ao buscar amigos:", error);
-      toast.error("Erro ao carregar lista de amigos.");
+      console.error('Erro ao buscar amigos:', error);
+      toast.error('Erro ao carregar lista de amigos.');
     }
   };
 
@@ -85,23 +111,46 @@ class UserFriendships extends Component {
     const { userEmail, emailToAdd } = this.state;
 
     if (!emailToAdd) {
-      toast.error("Digite um e-mail válido para adicionar um amigo.");
+      toast.error('Digite um e-mail válido para adicionar um amigo.');
       return;
     }
 
     try {
-      console.log("Tentando adicionar amigo com emailCliente1:", userEmail, ", emailCliente2:", emailToAdd);
+      console.log('Tentando adicionar amigo com emailCliente1:', userEmail, ', emailCliente2:', emailToAdd);
       const response = await axios.post(
         `${API_BASE_URL}/api/amizades/create`,
         null,
         { params: { emailCliente1: userEmail, emailCliente2: emailToAdd } }
       );
-      console.log("Amizade criada com sucesso:", response.data);
-      toast.success("Amigo adicionado com sucesso!");
+      console.log('Amizade criada com sucesso:', response.data);
+      toast.success('Amigo adicionado com sucesso!');
       this.fetchFriends(); // Atualiza a lista de amigos após a adição
     } catch (error) {
-      console.error("Erro ao adicionar amigo:", error);
-      toast.error("Erro ao adicionar amigo.");
+      console.error('Erro ao adicionar amigo:', error);
+      toast.error('Erro ao adicionar amigo.');
+    }
+  };
+
+  // Função para remover um amigo usando o email
+  removeFriend = async (friendEmail) => {
+    const { userEmail } = this.state;
+
+    if (!friendEmail) {
+      toast.error('Não foi possível identificar o email do amigo.');
+      return;
+    }
+
+    try {
+      console.log('Tentando remover amizade com emailCliente1:', userEmail, ', emailCliente2:', friendEmail);
+      const response = await axios.delete(`${API_BASE_URL}/api/amizades/delete`, {
+        params: { emailCliente1: userEmail, emailCliente2: friendEmail },
+      });
+      console.log('Amizade removida com sucesso:', response.data);
+      toast.success('Amizade removida com sucesso!');
+      this.fetchFriends(); // Atualiza a lista de amigos após a remoção
+    } catch (error) {
+      console.error('Erro ao remover amigo:', error);
+      toast.error('Erro ao remover amigo.');
     }
   };
 
@@ -138,19 +187,20 @@ class UserFriendships extends Component {
 
           {/* Lista de amigos exibida como cartões */}
           <div className="row">
-            {friends.map((friend) => (
-              <div className="col-md-4" key={friend.id}>
-                <div className="card border-secondary mb-3" style={{ maxWidth: "20rem" }}>
+            {friends.map((friend, index) => (
+              <div className="col-md-4" key={index}>
+                <div className="card border-secondary mb-3" style={{ maxWidth: '20rem' }}>
                   <div className="card-header">
-                    {friend.nome} {friend.sobrenome}
+                    {friend.nome || 'Amigo Anônimo'} {/* Nome do amigo */}
                   </div>
                   <div className="card-body">
-                    {friend.foto ? (
-                      <img src={friend.foto} alt="Foto do Amigo" className="img-fluid mb-3 rounded-circle" />
-                    ) : (
-                      <div className="placeholder bg-secondary mb-3" style={{ width: '100%', height: '150px' }} />
-                    )}
-                    <h5 className="card-title">Pontos: {friend.totalPoints}</h5>
+                    <h5 className="card-title">Pontos: {friend.totalPoints}</h5> {/* Pontos do amigo */}
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => this.removeFriend(friend.email)} // Envia o email correto
+                    >
+                      Remover Amigo
+                    </button>
                   </div>
                 </div>
               </div>
