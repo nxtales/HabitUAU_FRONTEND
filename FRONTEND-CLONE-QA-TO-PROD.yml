@@ -1,0 +1,17 @@
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+    persistCredentials: true  # Isso mantém as credenciais do Git
+
+  - script: |
+      git config --global user.email "natthaliebohm@hotmail.com"
+      git config --global user.name "Natthalie - Azure DevOps"
+      git fetch origin
+      git checkout FRONTEND_QA  # Faz o checkout da branch QA
+      git checkout -b FRONTEND_PROD  # -B força a recriação da branch PROD
+      git push origin FRONTEND_PROD --force  # Força o push para HabitUAU_PROD
+    displayName: 'Forçar clone de FRONTEND_QA para FRONTEND_PROD'
