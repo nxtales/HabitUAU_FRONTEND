@@ -8,17 +8,18 @@ function withNavigate(Component) {
     };
 }
 
-const UserNavbar = ({ navigate }) => {
+const AdminNavbar = ({ navigate }) => {
     return (
       <nav className="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
         <div className="container-fluid">
-          <a className="navbar-brand" href="#/userArea">
+          <a className="navbar-brand" href="#/adminArea">
             <img
               src="/assets/HABITUAU_LOGOLONG.png"
               alt="Logo"
               height="40"
               style={{ maxWidth: "100%", height: "auto" }}
             />
+            <h1 className='text-center'>CORPORATIVO</h1>
           </a>
           <button
             className="navbar-toggler"
@@ -34,23 +35,33 @@ const UserNavbar = ({ navigate }) => {
           <div className="collapse navbar-collapse" id="navbarColor01">
             <ul className="navbar-nav me-auto">
               <li className="nav-item">
-                <a className="nav-link" href="#/userArea">
-                  Meus Desafios
+                <a className="nav-link" href="#/viewFiliais">
+                  Filiais
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#/userRanking">
-                  Meu Ranking
+                <a className="nav-link" href="#/viewAdmins">
+                 Admins 
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#/userFriends">
-                  Meus Amigos
+                <a className="nav-link" href="#/viewPartners">
+                  Parceiros
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="#/userAccount">
-                  Minha Conta
+                <a className="nav-link" href="#/viewCategories">
+                  Segmentos
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#/viewChallenges">
+                  Desafios
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#/viewChallengeTasks">
+                  Tarefas
                 </a>
               </li>
             </ul>
@@ -66,4 +77,4 @@ const UserNavbar = ({ navigate }) => {
     );
 };
 
-export default withNavigate(UserNavbar);
+export default withNavigate(AdminNavbar);

@@ -38,7 +38,7 @@ class Landingpage extends React.Component {
                   </a>
                 </li>
                 <li className="nav-item">
-                  <a className="nav-link" href="#/userRegister">Área do Colaborador</a>
+                  <a className="nav-link" href="#/adminLogin">Área do Colaborador</a>
                 </li>
                 <li className="nav-item">
                   <a className="nav-link" href="FaleConosco">Fale Conosco</a>
