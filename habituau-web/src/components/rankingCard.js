@@ -11,12 +11,6 @@ const RankingCard = ({ rankingData }) => {
                 <div className="card-body">
                     {topUsers.map((user, index) => (
                         <div key={index} className="d-flex align-items-center mb-3">
-                            <img
-                                src={user.image}
-                                alt={user.name}
-                                className="rounded-circle"
-                                style={{ width: "50px", height: "50px", marginRight: "10px" }}
-                            />
                             <div>
                                 <h5 className="mb-1">{user.name}</h5>
                                 <p className="mb-0 text-muted">Pontos: {user.points}</p>
