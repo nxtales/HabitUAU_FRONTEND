@@ -46,18 +46,7 @@ class UserFriendships extends Component {
     }
   };
 
-  // Função para buscar o email de um cliente pelo CPF usando a API `retrieve`
-  fetchEmailByCpf = async (cpf) => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/cliente/retrieve/${cpf}`);
-      return response.data.email; // Retorna o email do cliente
-    } catch (error) {
-      console.error(`Erro ao buscar email para o CPF ${cpf}:`, error);
-      return undefined; // Retorna undefined em caso de erro
-    }
-  };
-
-  // Função para buscar a lista de amizades e calcular os pontos
+  // Função para buscar a lista de amizades e calcular os pontos com base no desafio de maior pontuação
   fetchFriends = async () => {
     const cpf = localStorage.getItem('cpf'); // CPF do usuário autenticado
     if (!cpf) {
@@ -79,22 +68,19 @@ class UserFriendships extends Component {
           const amigoCpf = isCurrentUserCliente1 ? friend.cpfCliente2 : friend.cpfCliente1; // CPF do amigo
           const amigoNome = isCurrentUserCliente1 ? friend.nomeCliente2 : friend.nomeCliente1; // Nome do amigo
 
-          // Busca o email do amigo usando o CPF
-          const amigoEmail = await this.fetchEmailByCpf(amigoCpf);
-
-          // Obtém os pontos do amigo
-          const pointsResponse = await axios.get(`${API_BASE_URL}/api/challenges/getuserchallengetasks`, {
-            params: { cpf: amigoCpf },
-          });
-
-          const totalPoints = pointsResponse.data.reduce((sum, task) => {
-            return sum + (task.completed ? task.points : 0);
-          }, 0);
+          // Chama a API `/pordesafio/{cpfCliente}` para obter a pontuação
+          let totalPoints = 0;
+          try {
+            const pointsResponse = await axios.get(`${API_BASE_URL}/api/ranking/pordesafio/${amigoCpf}`);
+            totalPoints = pointsResponse.data.pontos || 0;
+          } catch (error) {
+            console.error(`Erro ao buscar pontos para o CPF ${amigoCpf}:`, error);
+          }
 
           return {
             nome: amigoNome,
-            email: amigoEmail, // Agora o email é buscado corretamente
-            totalPoints,
+            email: friend.email, // Email já retornado pela API
+            totalPoints, // Pontuação do amigo
           };
         })
       );
@@ -161,6 +147,10 @@ class UserFriendships extends Component {
   render() {
     const { friends, emailToAdd } = this.state;
 
+    const formatPoints = (points) => {
+      return points.toLocaleString('pt-BR'); // Formata os pontos como número brasileiro
+    };
+
     return (
       <>
         <UserNavbar />
@@ -194,7 +184,7 @@ class UserFriendships extends Component {
                     {friend.nome || 'Amigo Anônimo'} {/* Nome do amigo */}
                   </div>
                   <div className="card-body">
-                    <h5 className="card-title">Pontos: {friend.totalPoints}</h5> {/* Pontos do amigo */}
+                    <h5 className="card-title">Pontos: {formatPoints(friend.totalPoints)}</h5> {/* Pontos formatados */}
                     <button
                       className="btn btn-danger"
                       onClick={() => this.removeFriend(friend.email)} // Envia o email correto
