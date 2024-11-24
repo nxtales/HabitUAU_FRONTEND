@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import UserNavbar from '../components/userNavbar';
 import ChallengeCardExhibit from '../components/challengeCardExhibit';
 
-document.body.style.backgroundColor = '#fffbf8';
-
 // Função de wrapper para usar o hook `useNavigate` em um componente de classe
 function withNavigate(Component) {
   return function WrapperComponent(props) {
@@ -29,7 +27,18 @@ class FindChallenges extends Component {
         'https://habituau-dev-f2breaambnduhpaw.canadacentral-01.azurewebsites.net/api/challenges/find',
         { params: { searchString: '' } }
       );
-      this.setState({ challenges: response.data });
+
+      console.log("API response data:", response.data); // Log para verificar os dados recebidos
+
+      // Normaliza os dados para o componente filho
+      const normalizedChallenges = response.data.map((challenge) => ({
+        id: challenge.id,
+        nome: challenge.nome || "Desafio sem nome",
+        parceiroNome: challenge.parceiro?.nome || "Parceiro desconhecido",
+        categoriaNome: challenge.categoria?.nome || "Categoria desconhecida",
+      }));
+
+      this.setState({ challenges: normalizedChallenges });
     } catch (error) {
       console.error("Erro ao buscar desafios:", error);
     }
@@ -60,13 +69,11 @@ class FindChallenges extends Component {
 
   render() {
     const { challenges } = this.state;
-    const { navigate } = this.props;
 
     return (
       <>
         <UserNavbar />
-        <br></br>
-        <div className="container">
+        <div className="container mt-5">
           <div className="row">
             {challenges.map((challenge) => (
               <ChallengeCardExhibit
